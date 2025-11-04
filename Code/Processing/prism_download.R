@@ -44,26 +44,26 @@ for (year in names(year_months)) {
     # Try downloading until successful
     success = FALSE
     attempt = 1
-    while (!success && attempt <= 5) {   # up to 5 attempts
+    while (!success && attempt <= 5) { # Up to 5 attempts
       message("Downloading: ", url, " (attempt ", attempt, ")")
       tryCatch({
         download.file(url, dest_zip, quiet = TRUE, mode = "wb")
         
-        # check if file actually downloaded
+        # Check if file downloaded
         if (file.exists(dest_zip) && file.info(dest_zip)$size > 0) {
           success = TRUE
         } else {
-          Sys.sleep(2) # wait before retry
+          Sys.sleep(2) # Wait before retry
         }
       }, error = function(e) {
         message("Download failed: ", conditionMessage(e))
-        Sys.sleep(2) # wait before retry
+        Sys.sleep(2) # Wait before retry
       })
       attempt = attempt + 1
     }
     
     if (!success) {
-      message("Skipping ", year, "-", month_str, ": could not download after retries.")
+      message("Skipping ", year, "-", month_str, ": could not download.")
       next
     }
     

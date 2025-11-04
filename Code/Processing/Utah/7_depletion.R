@@ -8,13 +8,18 @@ library(sf)
 fields_panel = st_read("Data/Clean/Fields/Utah/fields_panel.gpkg") |> 
   st_drop_geometry()
 
+# Load masterdata
 load("Data/Clean/Depletion/Utah/masterdata.rda")
 
 # ==== CALCULATE DEPLETION =====================================================
 
+# Calculate monthly depletion for each field and growing month
 depletion_monthly = masterdata |> 
+  # Filter to growing season months
   filter(month %in% 4:10) |> 
+  # Arrange data to calculate depletion sequentially
   arrange(id, year, month) |> 
+  # Group by field and year for monthly water balance model
   group_by(id, year) |> 
   mutate(
     sm_start = pmax(0, smco_in[1] - cumsum(pmax(0, et_in - peff_in)) + pmax(0, et_in - peff_in)),
@@ -23,7 +28,10 @@ depletion_monthly = masterdata |>
     
     sm_end = sm_start - sm_used,
     
+    # Depletion = actual ET - soil moisture - effective precip
     depletion_in = pmax(0, et_in - sm_start - peff_in),
+    
+    # Convert depletion to feet and acre-feet
     depletion_ft = depletion_in / 12,
     depletion_af = acres * depletion_ft
   ) |> 

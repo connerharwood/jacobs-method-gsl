@@ -21,7 +21,7 @@ fields_panel_temp = st_read("Data/Clean/Fields/Utah/Temp/fields_panel_temp.gpkg"
   # Align CRS with CDL rasters
   st_transform(crs = crs(sample_rast))
 
-# Filter to fields missing crop info
+# Filter to fields missing WRLU crop
 fields_crop_na = fields_panel_temp |> filter(is.na(crop))
 
 # List of yearly CDL TIFF files
@@ -72,7 +72,7 @@ for (file in tiff_files) {
 
 # ==== HARMONIZE WRLU AND CDL CROPS ============================================
 
-# Join fields panel with CDl data
+# Join fields panel with CDL data
 fields_panel = fields_panel_temp |> 
   # Merge with unnested CDL data
   left_join(

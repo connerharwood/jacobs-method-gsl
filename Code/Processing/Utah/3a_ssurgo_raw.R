@@ -34,7 +34,7 @@ mu_polys = mu_polys_files |>
 # Save appended SSURGO polygons as layer in .gpkg file
 st_write(mu_polys, ssurgo_output, layer = "mu_polys", delete_layer = TRUE)
 
-# ==== APPEND COMPONENT DATA ===================================================
+# ==== APPEND MAP UNIT COMPONENT DATA ==========================================
 
 # All map unit component files
 comp_files = list.files(

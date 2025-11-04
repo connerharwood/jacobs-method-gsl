@@ -3,11 +3,12 @@ library(tidyverse)
 library(sf)
 library(readxl)
 library(glue)
+library(gdalraster)
 
 # ==== REPAIR WRLU GEOMETRY ====================================================
 
 for (year in 2017:2024) {
-  # Full path of raw shapefile to fix
+  # Full path of raw shapefile to repair
   shapefile_raw = list.files(
     path = file.path("Data/Raw/Fields/Utah/Raw WRLU", year),
     pattern = paste0(".*", year, ".*\\.shp$"),
@@ -15,16 +16,15 @@ for (year in 2017:2024) {
     recursive = FALSE
   )
   
-  # Full path to write fixed shapefile to
-  shapefile_fixed = file.path("Data/Raw/Fields/Utah/Repaired WRLU", year, paste0("wrlu_", year, ".shp"))
+  # Full path to write repaired shapefile to
+  shapefile_repaired = file.path("Data/Raw/Fields/Utah/Repaired WRLU", year, paste0("wrlu_", year, ".shp"))
   
   # Use ogr2ogr to validate geometry of raw shapefile, saving as new shapefile
-  system(paste(
-    "ogr2ogr -f 'ESRI Shapefile'",
-    shQuote(shapefile_fixed),
-    shQuote(shapefile_raw),
-    "-makevalid"
-  ))
+  ogr2ogr(
+    src_dsn = shapefile_raw,
+    dst_dsn = shapefile_repaired,
+    cl_arg  = "-makevalid"
+  )
 }
 
 # ==== LOAD ====================================================================
@@ -224,6 +224,12 @@ fields_panel_temp = wrlu_harmonized |>
   ) |> 
   # Order each field by descending year
   arrange(id, desc(year))
+
+crop_count_new = fields_panel_temp |> 
+  st_drop_geometry() |> 
+  group_by(crop, year) |> 
+  count() |> 
+  pivot_wider(names_from = year, values_from = n)
 
 # ==== SAVE ====================================================================
 

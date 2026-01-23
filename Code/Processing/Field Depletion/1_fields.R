@@ -163,7 +163,7 @@ grass_hay_fields = wrlu_panel |>
 # Harmonize WRLU crops across years
 wrlu_harmonized = wrlu_panel |> 
   mutate(crop = case_when(
-    # Overwrite 2018-2023 Alfalfa crop with Grass Hay if 2024 crop was Grass Hay
+    # Overwrite 2017-2023 Alfalfa crop with Grass Hay if 2024 crop was Grass Hay
     id %in% grass_hay_fields$id & year < 2024 & crop == "Alfalfa" ~ "Grass Hay",
     # Put Fallow, Idle, and Idle Pasture into one category
     crop %in% c("Fallow", "Idle", "Idle Pasture") ~ "Fallow/Idle",
@@ -207,7 +207,7 @@ cdl_wrlu_proportions = wrlu_harmonized |>
 
 # ==== FINALIZE PRE-CDL PANEL ==================================================
 
-# Finalize 2018-2024 fields panel
+# Finalize 2017-2024 fields panel
 fields_panel_temp = wrlu_harmonized |> 
   # Select needed variables
   select(

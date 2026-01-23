@@ -7,7 +7,7 @@ dir = "Data/Raw/PRISM/"
 # Define the months to download for each year
 year_months = list(
   "2016" = 11:12,
-  "2017" = 1:10,
+  "2017" = 1:12,
   "2018" = 1:12,
   "2019" = 1:12,
   "2020" = 1:12,

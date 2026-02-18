@@ -105,5 +105,15 @@ for yr in range(2017, 2025):
 wrlu_base = wrlu_2024
 
 # Loop through each year, spatially joining with 2024 fields
-for yr in range(2017, 2025):
-    
+for yr in range(2017, 2024):
+    # Get current year's WRLU gpdf
+    wrlu_current = wrlu_dict[yr]
+
+    # Intersect current year's fields with 2024 fields
+    wrlu_base = gpd.sjoin(
+        wrlu_base,
+        wrlu_current,
+        how="left",
+        predicate="intersects"
+    ).drop(columns = ["index_right"])
+# %%

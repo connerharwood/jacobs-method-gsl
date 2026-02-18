@@ -99,8 +99,8 @@ depletion_annual = depletion_monthly |>
     depletion_af
   )
 
-median(depletion_annual$depletion_ft, na.rm = TRUE) # 1.51416
-median(depletion_annual$depletion_af, na.rm = TRUE) # 7.480125
+median(depletion_annual$depletion_ft, na.rm = TRUE) # 1.487447
+median(depletion_annual$depletion_af, na.rm = TRUE) # 7.337813
 
 # ==== SAVE ====================================================================
 

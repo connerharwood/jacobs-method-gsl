@@ -494,7 +494,7 @@ totals = compare |>
   group_by(year) |> 
   summarize(depletion_jm = sum(depletion_jm), depletion_wb = sum(depletion_wb), .groups = "drop")
 
-sby_basin_annual = depletion_annual |> 
+by_basin_annual = depletion_annual |> 
   group_by(basin, year) |> 
   summarize(depletion_af = sum(depletion_af, na.rm = TRUE), .groups = "drop") |> 
   filter(!basin %in% c("Sevier River", "Uintah")) |> 

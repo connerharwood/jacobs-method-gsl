@@ -9,7 +9,7 @@ fields_panel = st_read("Data/Clean/fields_panel.gpkg") |>
   st_drop_geometry()
 
 # Load masterdata
-load("Data/Clean/masterdata_new.rda")
+load("Data/Clean/masterdata.rda")
 
 # ==== CALCULATE DEPLETION =====================================================
 
@@ -90,5 +90,5 @@ median(depletion_annual$depletion_af, na.rm = TRUE) # 7.299035
 
 # ==== SAVE ====================================================================
 
-save(depletion_monthly, file = "Data/Clean/depletion_monthly_new.rda")
-save(depletion_annual, file = "Data/Clean/depletion_annual_new.rda")
+save(depletion_monthly, file = "Data/Clean/depletion_monthly.rda")
+save(depletion_annual, file = "Data/Clean/depletion_annual.rda")

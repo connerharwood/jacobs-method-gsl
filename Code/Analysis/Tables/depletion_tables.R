@@ -11,6 +11,7 @@ comma2 = comma_format(accuracy = 0.01)
 # Load GSL subbasins
 gsl_basin = st_read("Data/Raw/GSL Basin/GSLSubbasins.shp") |> 
   select(basin = Name) |> 
+  filter(basin != "Strawberry") |> 
   st_make_valid() |> 
   st_transform(crs = 26912)
 
@@ -67,12 +68,12 @@ companies = st_read("Data/Raw/Service Areas/Irrigation_Company_Service_Areas.shp
   filter(overlap_percent >= 0.90)
 
 # Load 2024 WRLU fields
-fields = st_read("Data/Clean/Fields/Utah/fields_panel.gpkg") |> 
+fields = st_read("Data/Clean/fields_panel.gpkg") |> 
   filter(year == 2024) |> 
   st_filter(gsl_basin, .predicate = st_intersects)
 
 # Load field-level annual depletions
-load("Data/Clean/Depletion/Utah/depletion_annual.rda")
+load("Data/Clean/depletion_annual.rda")
 
 # Filter depletion data to GSL Basin fields
 depletion_annual = depletion_annual |> 

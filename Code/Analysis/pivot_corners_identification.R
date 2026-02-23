@@ -10,12 +10,13 @@ tmap_mode("view")
 
 # Load GSL subbasins
 gsl_basin = st_read("Data/Raw/GSL Basin/GSLSubbasins.shp") |> 
+  select(basin = Name) |> 
+  filter(basin != "Strawberry") |> 
   st_make_valid() |> 
-  st_transform(crs = 26912) |> 
-  select(basin = Name)
+  st_transform(crs = 26912)
 
 # Load 2024 WRLU fields
-fields = st_read("Data/Clean/Fields/Utah/fields_panel.gpkg") |>
+fields = st_read("Data/Clean/fields_panel.gpkg") |>
   # Filter to just 2024
   filter(year == 2024) |> 
   # Filter to fields within GSL Basin
@@ -33,11 +34,13 @@ box_elder_corners = selectFeatures(
 # Save Box Elder County pivot corners
 st_write(
   box_elder_corners, 
-  "Data/Clean/Fields/Utah/pivot_corners.gpkg", 
+  "Data/Clean/pivot_corners.gpkg", 
   layer = "Box Elder", 
   delete_layer = TRUE, 
   delete_dsn = FALSE
 )
+
+# DONE
 
 # ==== CACHE COUNTY ============================================================
 
@@ -51,11 +54,13 @@ cache_corners = selectFeatures(
 # Save Cache County pivot corners
 st_write(
   cache_corners,
-  "Data/Clean/Fields/Utah/pivot_corners.gpkg",
+  "Data/Clean/pivot_corners.gpkg",
   layer = "Cache",
   delete_layer = TRUE,
   delete_dsn = FALSE
 )
+
+# DONE
 
 # ==== CARBON COUNTY ===========================================================
 
@@ -69,11 +74,13 @@ carbon_corners = selectFeatures(
 # Save Carbon County pivot corners
 st_write(
   carbon_corners, 
-  "Data/Clean/Fields/Utah/pivot_corners.gpkg", 
+  "Data/Clean/pivot_corners.gpkg", 
   layer = "Carbon", 
   delete_layer = TRUE, 
   delete_dsn = FALSE
 )
+
+# DONE
 
 # ==== DAVIS COUNTY ============================================================
 
@@ -87,11 +94,13 @@ davis_corners = selectFeatures(
 # Save Davis County pivot corners
 st_write(
   davis_corners, 
-  "Data/Clean/Fields/Utah/pivot_corners.gpkg", 
+  "Data/Clean/pivot_corners.gpkg", 
   layer = "Davis", 
   delete_layer = TRUE, 
   delete_dsn = FALSE
 )
+
+# DONE
 
 # ==== DUCHESNE COUNTY =========================================================
 
@@ -105,11 +114,13 @@ duchesne_corners = selectFeatures(
 # Save Duchesne County pivot corners
 st_write(
   duchesne_corners, 
-  "Data/Clean/Fields/Utah/pivot_corners.gpkg", 
+  "Data/Clean/pivot_corners.gpkg", 
   layer = "Duchesne", 
   delete_layer = TRUE, 
   delete_dsn = FALSE
 )
+
+# DONE
 
 # ==== JUAB COUNTY =============================================================
 
@@ -123,11 +134,13 @@ juab_corners = selectFeatures(
 # Save Juab County pivot corners
 st_write(
   juab_corners, 
-  "Data/Clean/Fields/Utah/pivot_corners.gpkg", 
+  "Data/Clean/pivot_corners.gpkg", 
   layer = "Juab", 
   delete_layer = TRUE, 
   delete_dsn = FALSE
 )
+
+# DONE
 
 # ==== MORGAN COUNTY ===========================================================
 
@@ -141,11 +154,13 @@ morgan_corners = selectFeatures(
 # Save Morgan County pivot corners
 st_write(
   morgan_corners, 
-  "Data/Clean/Fields/Utah/pivot_corners.gpkg", 
+  "Data/Clean/pivot_corners.gpkg", 
   layer = "Morgan", 
   delete_layer = TRUE, 
   delete_dsn = FALSE
 )
+
+# DONE
 
 # ==== RICH COUNTY =============================================================
 
@@ -159,11 +174,13 @@ rich_corners = selectFeatures(
 # Save Rich County pivot corners
 st_write(
   rich_corners, 
-  "Data/Clean/Fields/Utah/pivot_corners.gpkg", 
+  "Data/Clean/pivot_corners.gpkg", 
   layer = "Rich", 
   delete_layer = TRUE, 
   delete_dsn = FALSE
 )
+
+# DONE
 
 # ==== SALT LAKE COUNTY ========================================================
 
@@ -177,11 +194,13 @@ salt_lake_corners = selectFeatures(
 # Save Salt Lake County pivot corners
 st_write(
   salt_lake_corners, 
-  "Data/Clean/Fields/Utah/pivot_corners.gpkg", 
+  "Data/Clean/pivot_corners.gpkg", 
   layer = "Salt Lake", 
   delete_layer = TRUE, 
   delete_dsn = FALSE
 )
+
+# DONE
 
 # ==== SANPETE COUNTY ==========================================================
 
@@ -195,11 +214,13 @@ sanpete_corners = selectFeatures(
 # Save Sanpete County pivot corners
 st_write(
   sanpete_corners, 
-  "Data/Clean/Fields/Utah/pivot_corners.gpkg", 
+  "Data/Clean/pivot_corners.gpkg", 
   layer = "Sanpete", 
   delete_layer = TRUE, 
   delete_dsn = FALSE
 )
+
+# DONE
 
 # ==== SUMMIT COUNTY ===========================================================
 
@@ -213,11 +234,13 @@ summit_corners = selectFeatures(
 # Save Summit County pivot corners
 st_write(
   summit_corners, 
-  "Data/Clean/Fields/Utah/pivot_corners.gpkg", 
+  "Data/Clean/pivot_corners.gpkg", 
   layer = "Summit", 
   delete_layer = TRUE, 
   delete_dsn = FALSE
 )
+
+# DONE
 
 # ==== TOOELE COUNTY ===========================================================
 
@@ -231,11 +254,13 @@ tooele_corners = selectFeatures(
 # Save Tooele County pivot corners
 st_write(
   tooele_corners, 
-  "Data/Clean/Fields/Utah/pivot_corners.gpkg", 
+  "Data/Clean/pivot_corners.gpkg", 
   layer = "Tooele", 
   delete_layer = TRUE, 
   delete_dsn = FALSE
 )
+
+# DONE
 
 # ==== UTAH COUNTY =============================================================
 
@@ -249,11 +274,13 @@ utah_corners = selectFeatures(
 # Save Utah County pivot corners
 st_write(
   utah_corners, 
-  "Data/Clean/Fields/Utah/pivot_corners.gpkg", 
+  "Data/Clean/pivot_corners.gpkg", 
   layer = "Utah", 
   delete_layer = TRUE, 
   delete_dsn = FALSE
 )
+
+# DONE
 
 # ==== WASATCH COUNTY ============================================================
 
@@ -267,11 +294,13 @@ wasatch_corners = selectFeatures(
 # Save Wasatch County pivot corners
 st_write(
   wasatch_corners, 
-  "Data/Clean/Fields/Utah/pivot_corners.gpkg", 
+  "Data/Clean/pivot_corners.gpkg", 
   layer = "Wasatch", 
   delete_layer = TRUE, 
   delete_dsn = FALSE
 )
+
+# DONE
 
 # ==== WEBER COUNTY ============================================================
 
@@ -285,8 +314,10 @@ weber_corners = selectFeatures(
 # Save Weber County pivot corners
 st_write(
   weber_corners, 
-  "Data/Clean/Fields/Utah/pivot_corners.gpkg", 
+  "Data/Clean/pivot_corners.gpkg", 
   layer = "Weber", 
   delete_layer = TRUE, 
   delete_dsn = FALSE
 )
+
+# DONE

@@ -9,31 +9,17 @@ fields_panel = st_read("Data/Clean/fields_panel.gpkg") |>
   st_drop_geometry()
 
 # Load masterdata
-load("Data/Clean/masterdata.rda")
+load("Data/Clean/masterdata_new.rda")
 
 # ==== CALCULATE DEPLETION =====================================================
 
-# Calculate monthly depletion for each field and growing month
 depletion_monthly = masterdata |> 
-  # Filter to growing season months
   filter(month %in% 4:10) |> 
-  # Arrange data to calculate depletion sequentially
   arrange(id, year, month) |> 
-  # Group by field and year for monthly water balance model
-  group_by(id, year) |> 
   mutate(
-    sm_start = pmax(0, smco_in[1] - cumsum(pmax(0, et_in - peff_in)) + pmax(0, et_in - peff_in)),
-    
-    sm_used = pmin(sm_start, pmax(0, et_in - peff_in)),
-    
-    sm_end = sm_start - sm_used,
-    
-    # Depletion = actual ET - soil moisture - effective precip
-    depletion_in = pmax(0, et_in - sm_start - peff_in),
-    
-    # Convert depletion to feet and acre-feet
+    depletion_in = pmax(0, et_in - smco_in - peff_in),
     depletion_ft = depletion_in / 12,
-    depletion_af = acres * depletion_ft
+    depletion_af = depletion_ft * acres
   ) |> 
   ungroup() |> 
   left_join(
@@ -65,15 +51,15 @@ depletion_monthly = masterdata |>
 depletion_annual = depletion_monthly |> 
   group_by(id, year) |> 
   summarize(
-    et_in = sum(et_in, na.rm = FALSE), # Growing season ET (inches)
-    peff_in = sum(peff_in, na.rm = FALSE), # Growing season effective precip (inches)
-    smco_in = first(smco_in), # Carryover soil moisture (inches)
-    
-    depletion_in = sum(depletion_in, na.rm = FALSE), # Growing season depletion (inches)
-    depletion_ft = sum(depletion_ft, na.rm = FALSE), # Growing season depletion (feet)
-    depletion_af = sum(depletion_af, na.rm = FALSE), # Growing season depletion (acre-feet)
+    et_in_grow = sum(et_in, na.rm = FALSE),
+    peff_in_grow = sum(peff_in, na.rm = FALSE),
+    smco_in_april = first(smco_in),
+    depletion_in = sum(depletion_in, na.rm = FALSE),
+    depletion_ft = sum(depletion_ft, na.rm = FALSE), 
+    depletion_af = sum(depletion_af, na.rm = FALSE),
     .groups = "drop"
   ) |> 
+  ungroup() |> 
   left_join(
     fields_panel,
     by = c("id", "year"),
@@ -91,18 +77,18 @@ depletion_annual = depletion_monthly |>
     crop_group,
     irr_method,
     acres,
-    et_in,
-    peff_in,
-    smco_in,
+    et_in_grow,
+    peff_in_grow,
+    smco_in_april,
     depletion_in,
     depletion_ft,
     depletion_af
   )
 
-median(depletion_annual$depletion_ft, na.rm = TRUE) # 1.487447
-median(depletion_annual$depletion_af, na.rm = TRUE) # 7.337813
+median(depletion_annual$depletion_ft, na.rm = TRUE) # 1.486835
+median(depletion_annual$depletion_af, na.rm = TRUE) # 7.299035
 
 # ==== SAVE ====================================================================
 
-save(depletion_monthly, file = "Data/Clean/depletion_monthly.rda")
-save(depletion_annual, file = "Data/Clean/depletion_annual.rda")
+save(depletion_monthly, file = "Data/Clean/depletion_monthly_new.rda")
+save(depletion_annual, file = "Data/Clean/depletion_annual_new.rda")

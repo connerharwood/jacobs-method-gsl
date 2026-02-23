@@ -1,6 +1,7 @@
 
 library(tidyverse)
 library(sf)
+library(purrr)
 
 # ==== LOAD ====================================================================
 
@@ -54,28 +55,47 @@ merge = expand_grid(
     openet_eemetric,
     by = c("id", "year", "month"),
     relationship = "one-to-one"
-  )
+  ) |> 
+  # Calculate monthly effective precipitation
+  mutate(peff_in = pmax(0, swsf * (0.70917 * prcp_in ^ 0.82416 - 0.11556) * 10 ^ (0.02426 * et_in)))
+
+rm(fields_panel, ssurgo, prism, openet_eemetric)
+gc()
 
 # ==== DEPLETION INPUTS ========================================================
 
-depletion_data1 = merge |> 
-  # Calculate monthly effective precipitation
-  mutate(peff_in = pmax(0, swsf * (0.70917 * prcp_in ^ 0.82416 - 0.11556) * 10 ^ (0.02426 * et_in))) |> 
-  group_by(id, water_year) |> 
-  # Calculate winter carryover soil moisture
-  mutate(smco_in = pmax(0, pmin(0.67 * (prcp_win_in - 1.25 * et_win_in), 0.75 * rz_in * awc_in_in))) |> 
-  ungroup()
+# Compute growing season monthly soil moisture
+smco = merge |>
+  mutate(
+    # Calculate max soil moisture allowed
+    smco_cap_in = 0.75 * rz_in * awc_in_in,
+    # Calculate winter carryover soil moisture in April
+    smco_april_in = pmax(0, pmin(0.67 * (prcp_win_in - 1.25 * et_win_in), smco_cap_in))
+  ) |> 
+  # Filter to growing season months
+  filter(month %in% 4:10) |>
+  group_by(id, water_year) |>
+  arrange(month, .by_group = TRUE) |>
+  mutate(
+    # Calculate soil moisture at start of each month
+    smco_in = {
+      # Function to calculate soil moisture from previous month's values
+      step = function(prev_smco, i) {
+        min(max(prev_smco - et_in[i - 1] + peff_in[i - 1], 0), smco_cap_in[i])
+      }
+      out = rep(NA_real_, n())
+      out[1] = smco_april_in[1]
+      # Apply carryover soil moisture calculation sequentially by month
+      out[2:7] = accumulate(2:7, step, .init = out[1])[-1]
+      out
+    }
+  ) |>
+  ungroup() |>
+  select(id, year, month, water_year, smco_in)
 
-depletion_data2 = depletion_data1 |> 
-  # Filter to April through October
-  filter(month %in% c(4, 5, 6, 7, 8, 9, 10)) |> 
-  group_by(id, water_year) |> 
-  # Calculate total growing season effective precipitation
-  summarize(peff_grow_in = sum(peff_in), .groups = "drop")
-
-# Join growing season effective precipitation with rest of data
-masterdata = depletion_data1 |> 
-  left_join(depletion_data2, by = c("id", "water_year")) |> 
+masterdata = merge |> 
+  # Join with growing season soil moisture
+  left_join(smco, by = c("id", "year", "month", "water_year")) |> 
   # Select needed variables
   select(
     id,
@@ -89,4 +109,4 @@ masterdata = depletion_data1 |>
 
 # ==== SAVE ====================================================================
 
-save(masterdata, file = "Data/Clean/masterdata.rda")
+save(masterdata, file = "Data/Clean/masterdata_new.rda")

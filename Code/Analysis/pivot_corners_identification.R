@@ -3,8 +3,6 @@ library(tidyverse)
 library(sf)
 library(mapedit)
 library(leaflet)
-library(tmap)
-tmap_mode("view")
 
 # ==== LOAD ====================================================================
 
@@ -22,7 +20,7 @@ fields = st_read("Data/Clean/fields_panel.gpkg") |>
   # Filter to fields within GSL Basin
   st_filter(gsl_basin, .predicate = st_intersects)
 
-# ==== BOX ELDER COUNTY ========================================================
+# ==== BOX ELDER ===============================================================
 
 # Interactively select pivot corners in Box Elder County
 box_elder_corners = selectFeatures(
@@ -36,13 +34,10 @@ st_write(
   box_elder_corners, 
   "Data/Clean/pivot_corners.gpkg", 
   layer = "Box Elder", 
-  delete_layer = TRUE, 
-  delete_dsn = FALSE
+  delete_layer = TRUE
 )
 
-# DONE
-
-# ==== CACHE COUNTY ============================================================
+# ==== CACHE ===================================================================
 
 # Interactively select pivot corners in Cache County
 cache_corners = selectFeatures(
@@ -56,13 +51,10 @@ st_write(
   cache_corners,
   "Data/Clean/pivot_corners.gpkg",
   layer = "Cache",
-  delete_layer = TRUE,
-  delete_dsn = FALSE
+  delete_layer = TRUE
 )
 
-# DONE
-
-# ==== CARBON COUNTY ===========================================================
+# ==== CARBON ==================================================================
 
 # Interactively select pivot corners in Carbon County
 carbon_corners = selectFeatures(
@@ -76,13 +68,10 @@ st_write(
   carbon_corners, 
   "Data/Clean/pivot_corners.gpkg", 
   layer = "Carbon", 
-  delete_layer = TRUE, 
-  delete_dsn = FALSE
+  delete_layer = TRUE
 )
 
-# DONE
-
-# ==== DAVIS COUNTY ============================================================
+# ==== DAVIS ===================================================================
 
 # Interactively select pivot corners in Davis County
 davis_corners = selectFeatures(
@@ -96,33 +85,10 @@ st_write(
   davis_corners, 
   "Data/Clean/pivot_corners.gpkg", 
   layer = "Davis", 
-  delete_layer = TRUE, 
-  delete_dsn = FALSE
+  delete_layer = TRUE
 )
 
-# DONE
-
-# ==== DUCHESNE COUNTY =========================================================
-
-# Interactively select pivot corners in Duchesne County
-duchesne_corners = selectFeatures(
-  x = fields |> filter(county == "Duchesne"),
-  mode = "click",
-  map = leaflet() |> addProviderTiles("Esri.WorldImagery")
-)
-
-# Save Duchesne County pivot corners
-st_write(
-  duchesne_corners, 
-  "Data/Clean/pivot_corners.gpkg", 
-  layer = "Duchesne", 
-  delete_layer = TRUE, 
-  delete_dsn = FALSE
-)
-
-# DONE
-
-# ==== JUAB COUNTY =============================================================
+# ==== JUAB ====================================================================
 
 # Interactively select pivot corners in Juab County
 juab_corners = selectFeatures(
@@ -136,13 +102,10 @@ st_write(
   juab_corners, 
   "Data/Clean/pivot_corners.gpkg", 
   layer = "Juab", 
-  delete_layer = TRUE, 
-  delete_dsn = FALSE
+  delete_layer = TRUE
 )
 
-# DONE
-
-# ==== MORGAN COUNTY ===========================================================
+# ==== MORGAN ==================================================================
 
 # Interactively select pivot corners in Morgan County
 morgan_corners = selectFeatures(
@@ -156,13 +119,10 @@ st_write(
   morgan_corners, 
   "Data/Clean/pivot_corners.gpkg", 
   layer = "Morgan", 
-  delete_layer = TRUE, 
-  delete_dsn = FALSE
+  delete_layer = TRUE
 )
 
-# DONE
-
-# ==== RICH COUNTY =============================================================
+# ==== RICH ====================================================================
 
 # Interactively select pivot corners in Rich County
 rich_corners = selectFeatures(
@@ -176,13 +136,10 @@ st_write(
   rich_corners, 
   "Data/Clean/pivot_corners.gpkg", 
   layer = "Rich", 
-  delete_layer = TRUE, 
-  delete_dsn = FALSE
+  delete_layer = TRUE
 )
 
-# DONE
-
-# ==== SALT LAKE COUNTY ========================================================
+# ==== SALT LAKE ===============================================================
 
 # Interactively select pivot corners in Salt Lake County
 salt_lake_corners = selectFeatures(
@@ -196,13 +153,10 @@ st_write(
   salt_lake_corners, 
   "Data/Clean/pivot_corners.gpkg", 
   layer = "Salt Lake", 
-  delete_layer = TRUE, 
-  delete_dsn = FALSE
+  delete_layer = TRUE
 )
 
-# DONE
-
-# ==== SANPETE COUNTY ==========================================================
+# ==== SANPETE =================================================================
 
 # Interactively select pivot corners in Sanpete County
 sanpete_corners = selectFeatures(
@@ -216,13 +170,10 @@ st_write(
   sanpete_corners, 
   "Data/Clean/pivot_corners.gpkg", 
   layer = "Sanpete", 
-  delete_layer = TRUE, 
-  delete_dsn = FALSE
+  delete_layer = TRUE
 )
 
-# DONE
-
-# ==== SUMMIT COUNTY ===========================================================
+# ==== SUMMIT ==================================================================
 
 # Interactively select pivot corners in Summit County
 summit_corners = selectFeatures(
@@ -236,13 +187,10 @@ st_write(
   summit_corners, 
   "Data/Clean/pivot_corners.gpkg", 
   layer = "Summit", 
-  delete_layer = TRUE, 
-  delete_dsn = FALSE
+  delete_layer = TRUE
 )
 
-# DONE
-
-# ==== TOOELE COUNTY ===========================================================
+# ==== TOOELE ==================================================================
 
 # Interactively select pivot corners in Tooele County
 tooele_corners = selectFeatures(
@@ -256,13 +204,10 @@ st_write(
   tooele_corners, 
   "Data/Clean/pivot_corners.gpkg", 
   layer = "Tooele", 
-  delete_layer = TRUE, 
-  delete_dsn = FALSE
+  delete_layer = TRUE
 )
 
-# DONE
-
-# ==== UTAH COUNTY =============================================================
+# ==== UTAH ====================================================================
 
 # Interactively select pivot corners in Utah County
 utah_corners = selectFeatures(
@@ -276,13 +221,10 @@ st_write(
   utah_corners, 
   "Data/Clean/pivot_corners.gpkg", 
   layer = "Utah", 
-  delete_layer = TRUE, 
-  delete_dsn = FALSE
+  delete_layer = TRUE
 )
 
-# DONE
-
-# ==== WASATCH COUNTY ============================================================
+# ==== WASATCH =================================================================
 
 # Interactively select pivot corners in Wasatch County
 wasatch_corners = selectFeatures(
@@ -296,13 +238,10 @@ st_write(
   wasatch_corners, 
   "Data/Clean/pivot_corners.gpkg", 
   layer = "Wasatch", 
-  delete_layer = TRUE, 
-  delete_dsn = FALSE
+  delete_layer = TRUE
 )
 
-# DONE
-
-# ==== WEBER COUNTY ============================================================
+# ==== WEBER ===================================================================
 
 # Interactively select pivot corners in Weber County
 weber_corners = selectFeatures(
@@ -316,8 +255,5 @@ st_write(
   weber_corners, 
   "Data/Clean/pivot_corners.gpkg", 
   layer = "Weber", 
-  delete_layer = TRUE, 
-  delete_dsn = FALSE
+  delete_layer = TRUE
 )
-
-# DONE

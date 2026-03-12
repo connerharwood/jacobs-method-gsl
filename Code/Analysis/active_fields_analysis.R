@@ -9,6 +9,39 @@ tmap_mode("view")
 fields_panel = st_read("Data/Clean/fields_panel.gpkg")
 load("Data/Clean/depletion_annual.rda")
 
+# Load GSL subbasins
+gsl_basin = st_read("Data/Raw/GSL Basin/GSLSubbasins.shp") |> 
+  # Select only basin name
+  select(basin = Name) |> 
+  # Remove Strawberry Basin
+  filter(basin != "Strawberry") |> 
+  # Validate geometry
+  st_make_valid() |> 
+  # Transform to NAD 83 for spatial operations and plotting
+  st_transform(crs = 26912)
+
+# Load Utah counties
+counties = st_read("Data/Raw/Counties/Counties.shp") |> 
+  # Select only county name
+  select(county = NAME) |> 
+  # Convert county name to title case
+  mutate(county = str_to_title(county)) |> 
+  # Validate geometry
+  st_make_valid() |> 
+  # Transform to NAD 83 for spatial operations and plotting
+  st_transform(crs = 26912) |> 
+  # Filter to counties that intersect GSL Basin
+  st_filter(gsl_basin, .predicate = st_intersects) |> 
+  # Remove Duchesne County
+  filter(county != "Duchesne")
+
+# Intersect GSL Basin with Utah counties, dissolved into one outer boundary
+basin_boundary = gsl_basin |> 
+  st_intersection(counties) |> 
+  st_union() |> 
+  st_exterior_ring() |> 
+  st_as_sf()
+
 # ==== VARIABLE ANALYSIS =======================================================
 
 fields = fields_panel |> 
@@ -108,3 +141,75 @@ ggsave(
   bg = "white"
 )
 
+
+
+
+
+
+# Load WRLU ag fields
+fields_panel = st_read("Data/Clean/fields_panel.gpkg") |> 
+  # Filter to fields that intersect GSL Basin
+  st_filter(basin_boundary, .predicate = st_intersects) |> 
+  # Remove fallow/idle fields
+  filter(crop != "Fallow/Idle") |>
+  # Classify each field as dry or irrigated
+  mutate(
+    class = case_when(
+      land_use_group == "Dry Ag" ~ "Dry Ag",
+      land_use_group %in% c("Active IR", "SubIRR", NA) ~ "Irrigated"
+    )
+  )
+
+# Map of dry and irrigated fields
+field_lu_map = ggplot() +
+  # Add satellite imagery basemap
+  layer_spatial(data = basin_tile_mask) +
+  # Fields colored by class
+  geom_sf(
+    data = fields_panel |> filter(year == 2024),
+    aes(fill = class),
+    color = NA
+  ) +
+  # Two-category color scale
+  scale_fill_manual(
+    values = c(
+      "Dry Ag" = "red",     # tan / dryland
+      "Irrigated" = "blue"   # blue-green irrigated
+    ),
+    na.value = "darkgray"
+  ) +
+  # Create separate plot for each year
+  #facet_wrap(~year) +
+  # Add plot and legend titles
+  labs(title = "Field Classification, Cache County", fill = "LU Group") +
+  # Customize plot elements
+  theme(
+    panel.grid.major = element_blank(), # Remove major panel grids
+    panel.grid.minor = element_blank(), # Remove minor panel grids
+    axis.text = element_blank(), # Remove axes text
+    axis.ticks = element_blank(), # Remove axes ticks
+    axis.title = element_blank(), # Remove axes titles
+    panel.background = element_rect(fill = "white", color = NA), # Create white background
+    plot.background = element_rect(fill = "white", color = NA), # Create white background
+    legend.title = element_text(size = 14, margin = margin(b = 10)), # Adjust legend title
+    legend.text = element_text(size = 12), # Adjust legend tick labels
+    plot.title = element_blank(), # Adjust plot title
+    text = element_text(color = "black", family = "Lato"),
+  )
+field_lu_map
+
+# Save as high-resolution PNG image
+ggsave(
+  "Figures/Maps/field_lu_map.png",
+  plot = field_lu_map, 
+  width = 16, 
+  height = 10, 
+  units = "in", 
+  dpi = 500
+)
+
+tm_shape(fields_panel |> filter(year == 2024, class == "Dry Ag")) +
+  tm_basemap("Esri.WorldImagery") +
+  tm_borders(col = "red", lwd = 1) +
+  tm_shape(fields_panel |> filter(year == 2024, class == "Irrigated")) +
+  tm_borders(col = "blue", lwd = 1)

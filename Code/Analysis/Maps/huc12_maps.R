@@ -6,6 +6,7 @@ library(terra)
 library(sf)
 library(maptiles)
 library(extrafont)
+library(scales)
 
 # ==== LOAD ====================================================================
 
@@ -81,6 +82,7 @@ depletion_annual = depletion_annual |>
 
 # ==== PREP ====================================================================
 
+# Assign a HUC12 to each field
 fields_huc12 = fields |> 
   st_intersection(huc12s) |> 
   mutate(
@@ -94,6 +96,7 @@ fields_huc12 = fields |>
   # For each field and year, keep only the feature with highest overlap with POU
   slice_max(order_by = percent_overlap, n = 1, with_ties = FALSE)
 
+# Calculate median annual depletion across each HUC12's fields
 huc12_depletion = depletion_annual |> 
   left_join(
     fields_huc12 |> 
@@ -117,7 +120,6 @@ huc12_depletion = depletion_annual |>
     relationship = "one-to-many"
   ) |> 
   st_as_sf()
-# ==== HUC12 DEPTH CHORO =======================================================
 
 huc12_depletion_all = huc12s_basin |> 
   left_join(
@@ -129,7 +131,7 @@ huc12_depletion_all = huc12s_basin |>
   )
 
 # Manually designate where to label county names on map
-county_labels_huc12 = counties |> 
+county_labels = counties |> 
   st_point_on_surface() |> 
   # Grab X and Y coordinates
   st_coordinates() |>
@@ -170,6 +172,14 @@ county_labels_huc12 = counties |>
     )
   )
 
+huc12_ft_min = min(huc12_depletion_all$depletion_ft, na.rm = TRUE)
+huc12_ft_max = max(huc12_depletion_all$depletion_ft, na.rm = TRUE)
+
+huc12_af_min = min(huc12_depletion_all$depletion_af, na.rm = TRUE)
+huc12_af_max = max(huc12_depletion_all$depletion_af, na.rm = TRUE)
+
+# ==== HUC12 DEPTH CHORO =======================================================
+
 # Choropleth of field-level median annual depletion depth in GSL Basin
 huc12_depth_choro = ggplot() +
   # Color code each field by median annual depletion depth
@@ -204,27 +214,27 @@ huc12_depth_choro = ggplot() +
     aes(x = X, y = Y, label = basin),
     color = "black",
     bg.color = "white",
-    bg.r = 0.1,
-    size = 4.5,
+    bg.r = 0.09,
+    size = 14 / 2.845,
     fontface = "bold",
-    family = "Lato",
+    family = "lato",
     inherit.aes = FALSE,
-    nudge_x = 3000,
-    nudge_y = -8000
+    nudge_x = 4500,
+    nudge_y = -4500
   ) +
   # Create outlined labels for each county
   geom_shadowtext(
-    data = county_labels_huc12,
+    data = county_labels,
     aes(x = X, y = Y, label = county),
     color = "black",
     bg.color = "white",
     bg.r = 0.09,
-    size = 4.5, 
+    size = 14 / 2.845, 
     fontface = "bold",
-    family = "Lato",
+    family = "lato",
     inherit.aes = FALSE,
-    nudge_x = county_labels_huc12$nudge_x,
-    nudge_y = county_labels_huc12$nudge_y
+    nudge_x = county_labels$nudge_x,
+    nudge_y = county_labels$nudge_y
   ) +
   # Create continuous, sequential color scale for depletion depth
   scale_fill_gradientn(
@@ -232,22 +242,9 @@ huc12_depth_choro = ggplot() +
                "#7fcdbb", "#41b6c4", "#1d91c0",
                "#225ea8", "#253494", "#081d58"),
     na.value = "darkgray",
-    breaks = c(
-      min(huc12_depletion_all$depletion_ft, na.rm = TRUE),
-      # 0.8, 1.6, 2.4,
-      max(huc12_depletion_all$depletion_ft, na.rm = TRUE)
-    ),
-    labels = expression(
-      "0",
-      # "0.8",
-      # "1.6",
-      # "2.4",
-      "2.31"
-    ),
-    limits = c(
-      min(huc12_depletion_all$depletion_ft, na.rm = TRUE),
-      max(huc12_depletion_all$depletion_ft, na.rm = TRUE)
-    )
+    breaks = c(huc12_ft_min, huc12_ft_max),
+    labels = c(comma(huc12_ft_min, accuracy = 1), comma(huc12_ft_max, accuracy = 0.01)),
+    limits = c(huc12_ft_min, huc12_ft_max)
   ) +
   # Add plot and legend titles
   labs(title = "HUC12-Level Median Annual Depletion Depth, GSL Basin", fill = "Depletion (AFA)") +
@@ -255,20 +252,19 @@ huc12_depth_choro = ggplot() +
   theme_minimal() +
   # Customize plot elements
   theme(
-    panel.grid.major = element_blank(), # Remove major panel grids
-    panel.grid.minor = element_blank(), # Remove minor panel grids
-    axis.text = element_blank(), # Remove axes text
-    axis.ticks = element_blank(), # Remove axes ticks
-    axis.title = element_blank(), # Remove axes titles
-    panel.background = element_rect(fill = "white", color = NA), # Create white background
-    plot.background = element_rect(fill = "white", color = NA), # Create white background
-    legend.title = element_text(size = 14, margin = margin(b = 10)), # Adjust legend title
-    legend.text = element_text(size = 12), # Adjust legend tick labels
-    # plot.title = element_text(size = 20, hjust = 0.5), # Adjust plot title
-    plot.title = element_blank(),
-    legend.position = c(0.88, 0.9), # Adjust legend position
-    legend.justification = c(0, 1), # Adjust legend position
-    text = element_text(color = "black", family = "Lato")
+    text = element_text(color = "black", family = "lato"),
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white", color = NA),
+    plot.title = element_text(size = 18, face = "bold", hjust = 0.5, vjust = -4),
+    axis.ticks = element_blank(),
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.justification = c(0, 1),
+    legend.position = c(0.88, 0.9),
+    legend.title = element_text(size = 14, vjust = 2),
+    legend.text = element_text(size = 12)
   ) +
   # Adjust color scale bar
   guides(
@@ -327,27 +323,27 @@ huc12_volume_choro = ggplot() +
     aes(x = X, y = Y, label = basin),
     color = "black",
     bg.color = "white",
-    bg.r = 0.1,
-    size = 4.5,
+    bg.r = 0.09,
+    size = 14 / 2.845,
     fontface = "bold",
     family = "Lato",
     inherit.aes = FALSE,
-    nudge_x = 3000,
-    nudge_y = -8000
+    nudge_x = 4500,
+    nudge_y = -4500
   ) +
   # Create outlined labels for each county
   geom_shadowtext(
-    data = county_labels_huc12,
+    data = county_labels,
     aes(x = X, y = Y, label = county),
     color = "black",
     bg.color = "white",
-    bg.r = 0.12,
-    size = 4.5, 
+    bg.r = 0.09,
+    size = 14 / 2.845, 
     fontface = "bold",
     family = "Lato",
     inherit.aes = FALSE,
-    nudge_x = county_labels_huc12$nudge_x,
-    nudge_y = county_labels_huc12$nudge_y
+    nudge_x = county_labels$nudge_x,
+    nudge_y = county_labels$nudge_y
   ) +
   # Create continuous, sequential color scale for depletion volume
   scale_fill_gradientn(
@@ -355,22 +351,9 @@ huc12_volume_choro = ggplot() +
                "#7fcdbb", "#41b6c4", "#1d91c0",
                "#225ea8", "#253494", "#081d58"),
     na.value = "darkgray",
-    breaks = c(
-      min(huc12_depletion_all$depletion_af, na.rm = TRUE),
-      # 0.8, 1.6, 2.4,
-      max(huc12_depletion_all$depletion_af, na.rm = TRUE)
-    ),
-    labels = expression(
-      "0",
-      # "0.8",
-      # "1.6",
-      # "2.4",
-      "44,328"
-    ),
-    limits = c(
-      min(huc12_depletion_all$depletion_af, na.rm = TRUE),
-      max(huc12_depletion_all$depletion_af, na.rm = TRUE)
-    )
+    breaks = c(huc12_af_min, huc12_af_max),
+    labels = c(comma(huc12_af_min, accuracy = 1), comma(huc12_af_max, accuracy = 1)),
+    limits = c(huc12_af_min, huc12_af_max)
   ) +
   # Add plot and legend titles
   labs(title = "HUC12-Level Median Annual Depletion Volume, GSL Basin", fill = "Depletion (AF)") +
@@ -378,20 +361,19 @@ huc12_volume_choro = ggplot() +
   theme_minimal() +
   # Customize plot elements
   theme(
-    panel.grid.major = element_blank(), # Remove major panel grids
-    panel.grid.minor = element_blank(), # Remove minor panel grids
-    axis.text = element_blank(), # Remove axes text
-    axis.ticks = element_blank(), # Remove axes ticks
-    axis.title = element_blank(), # Remove axes titles
-    panel.background = element_rect(fill = "white", color = NA), # Create white background
-    plot.background = element_rect(fill = "white", color = NA), # Create white background
-    legend.title = element_text(size = 14, margin = margin(b = 10)), # Adjust legend title
-    legend.text = element_text(size = 12), # Adjust legend tick labels
-    #plot.title = element_text(size = 20, hjust = 0.5), # Adjust plot title
-    plot.title = element_blank(),
-    legend.position = c(0.88, 0.9),
+    text = element_text(color = "black", family = "lato"),
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white", color = NA),
+    plot.title = element_text(size = 18, face = "bold", hjust = 0.5, vjust = -4),
+    axis.ticks = element_blank(),
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
     legend.justification = c(0, 1),
-    text = element_text(color = "black", family = "Lato"),
+    legend.position = c(0.88, 0.9),
+    legend.title = element_text(size = 14, vjust = 2),
+    legend.text = element_text(size = 12)
   ) +
   # Adjust color scale bar
   guides(

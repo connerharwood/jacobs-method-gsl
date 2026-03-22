@@ -1,6 +1,7 @@
 
 library(tidyverse)
 library(sf)
+library(extrafont)
 
 # ==== LOAD ====================================================================
 
@@ -57,22 +58,6 @@ plot_data = depletion_filtered |>
   ) |> 
   ungroup() |> 
   mutate(median_diversion = depletion_ft - median_depletion_ft)
-
-plot_data1 = depletion_filtered |> 
-  filter(crop %in% by_crop$crop[1:5]) |> 
-  mutate(crop = factor(crop, levels = by_crop$crop)) |> 
-  group_by(crop) |> 
-  mutate(median_depletion_ft = median(depletion_ft, na.rm = TRUE)) |> 
-  ungroup() |> 
-  mutate(median_diversion = depletion_ft - median_depletion_ft)
-
-plot_data2 = depletion_filtered |> 
-  filter(crop %in% by_crop$crop[6:10]) |> 
-  mutate(crop = factor(crop, levels = by_crop$crop)) |> 
-  group_by(crop) |> 
-  mutate(median_depletion_ft = median(depletion_ft, na.rm = TRUE)) |> 
-  ungroup() |> 
-  mutate(median_diversion = depletion_ft - median_depletion_ft)
  
 label_data = plot_data |> 
   group_by(crop) |> 
@@ -100,23 +85,22 @@ depletion_boxplot = ggplot() +
     data = label_data,
     aes(x = crop, y = median, label = round(median, 2)),
     vjust = -0.6,
-    size = 4.5,
+    size = 14 / 2.845,
+    family = "lato"
   ) +
   geom_label(
     data = label_data,
     aes(x = crop, y = whisker_min, label = round(whisker_min, 2)),
-    vjust = 0.5,
-    size = 4.5,
-    border.color = "black",
-    linewidth = 0.4
+    size = 14 / 2.845,
+    linewidth = 0.4,
+    family = "lato"
   ) +
   geom_label(
     data = label_data,
     aes(x = crop, y = whisker_max, label = round(whisker_max, 2)),
-    vjust = 0,
-    size = 4.5,
-    border.color = "black",
-    linewidth = 0.4
+    size = 14 / 2.845,
+    linewidth = 0.4,
+    family = "lato"
   ) +
   labs(
     y = "Depletion (AFA)",
@@ -125,18 +109,21 @@ depletion_boxplot = ggplot() +
   ) +
   theme_minimal() +
   theme(
+    text = element_text(family = "lato"),
+    plot.title = element_text(hjust = 0.5, size = 18, face = "bold"),
+    axis.line = element_line(),
+    axis.ticks = element_line(),
+    axis.title = element_text(size = 16, face = "bold"),
+    axis.text.x = element_text(color = "black", size = 14, face = "bold"),
+    axis.text.y = element_text(color = "black", size = 14),
     panel.grid.minor = element_blank(),
-    panel.grid.major = element_blank(),
-    axis.line = element_line(color = "black"),
-    axis.text = element_text(color = "black", size = 14),
-    axis.title = element_text(color = "black", size = 14),
-    plot.title = element_text(hjust = 0.5, size = 16)
+    panel.grid.major = element_blank()
   )
 depletion_boxplot
 
 # Save plot
 ggsave(
-  "Figures/Plots/depletion_boxplot.png", 
+  "Figures/Graphs/depletion_boxplot.png", 
   plot = depletion_boxplot,
   dpi = 500,
   width = 13,
@@ -158,8 +145,8 @@ depletion_hist = ggplot() +
   geom_histogram(
     data = plot_data,
     aes(x = depletion_ft),
-    fill = "deepskyblue3",
-    bins = 150
+    fill = "#0072B2",
+    bins = 125
   ) +
   geom_vline(
     data = plot_data,
@@ -173,9 +160,10 @@ depletion_hist = ggplot() +
       y = Inf,
       label = round(median_depletion_ft, 2)
     ),
-    vjust = 1.2,
-    size = 4,
-    label.size = 0.3
+    vjust = 2.1,
+    size = 12 / 2.845,
+    linewidth = 0.3,
+    family = "lato"
   ) +
   facet_wrap(~crop, scales = "free", ncol = 2, axes = "all") +
   geom_text(
@@ -183,13 +171,29 @@ depletion_hist = ggplot() +
     aes(
       x = median_depletion_ft,
       y = Inf,
-      label = "← Median",
+      label = "\u2190",
       fontface = "plain"
     ),
-    vjust = 4.5,
-    hjust = -0.1,
-    size = 4.5,
-    inherit.aes = FALSE
+    vjust = 5.3,
+    hjust = -0.3,
+    size = 12 / 2.845,
+    inherit.aes = FALSE,
+    color = "white"
+  ) +
+  geom_text(
+    data = subset(plot_data, crop == levels(plot_data$crop)[1]),
+    aes(
+      x = median_depletion_ft,
+      y = Inf,
+      label = "Median",
+      fontface = "plain"
+    ),
+    vjust = 5.3,
+    hjust = -0.45,
+    size = 12 / 2.845,
+    inherit.aes = FALSE,
+    color = "white",
+    family = "lato"
   ) +
   coord_cartesian(xlim = c(0, 4)) +
   labs(
@@ -199,18 +203,20 @@ depletion_hist = ggplot() +
   ) +
   theme_minimal() +
   theme(
-    panel.grid = element_blank(),
-    axis.line = element_line(color = "black"),
-    plot.title = element_text(size = 15, hjust = 0.5, color = "black"),
-    strip.text = element_text(size = 12, color = "black"),
+    text = element_text(color = "black", family = "lato"),
+    plot.title = element_text(size = 18, hjust = 0.5, face = "bold"),
+    axis.line = element_line(),
+    axis.ticks = element_line(),
+    axis.title = element_text(size = 14, face = "bold"),
     axis.text = element_text(size = 12, color = "black"),
-    axis.title = element_text(size = 12, color = "black")
+    panel.grid = element_blank(),
+    strip.text = element_text(size = 14, face = "bold"),
   )
 depletion_hist
 
 # Save plot
 ggsave(
-  "Figures/Plots/depletion_hist.png", 
+  "Figures/Graphs/depletion_hist.png", 
   plot = depletion_hist,
   dpi = 500,
   width = 13.5,

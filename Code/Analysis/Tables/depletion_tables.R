@@ -72,7 +72,7 @@ companies = st_read("Data/Raw/Service Areas/Irrigation_Company_Service_Areas.shp
 # Load 2024 WRLU fields
 fields = st_read("Data/Clean/fields_panel.gpkg") |> 
   filter(year == 2024) |> 
-  st_filter(gsl_basin, .predicate = st_intersects)
+  st_filter(basin_boundary, .predicate = st_intersects)
 
 # Load pivot corners
 pivot_corners = map_dfr(

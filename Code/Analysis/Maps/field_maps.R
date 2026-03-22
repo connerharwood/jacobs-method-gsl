@@ -6,6 +6,7 @@ library(terra)
 library(sf)
 library(maptiles)
 library(extrafont)
+library(scales)
 
 # ==== LOAD ====================================================================
 
@@ -83,8 +84,6 @@ field_depletion = depletion_annual |>
   st_as_sf() |> 
   filter(!is.na(depletion_ft))
 
-# ==== FIELDS CHORO ============================================================
-
 # Fetch satellite imagery tile for GSL Basin basemap
 basin_tile = get_tiles(
   basin_boundary,
@@ -94,16 +93,6 @@ basin_tile = get_tiles(
   project = TRUE
 )
 
-# Esri.WorldImagery zoom = 11
-# Esri.WorldTopoMap zoom = 10
-# Esri.WorldGrayCanvas zoom = 11
-
-# Get spatial extent of tile
-basin_tile_extent = ext(basin_tile)
-
-# Convert tile to polygon then sf object
-basin_tile_poly = as.polygons(basin_tile_extent) |> st_as_sf() |> st_set_crs(st_crs(basin_tile))
-
 # Transform Utah portion of GSL Basin to align with tile's CRS, convert to terra vector
 basin_vect = st_transform(gsl_basin |> st_intersection(counties), crs(basin_tile)) |> vect()
 
@@ -111,11 +100,61 @@ basin_vect = st_transform(gsl_basin |> st_intersection(counties), crs(basin_tile
 basin_tile_crop = crop(basin_tile, basin_vect)
 basin_tile_mask = mask(basin_tile_crop, basin_vect)
 
+# Filter county spatial data to Box Elder County
+boxelder = counties |> filter(county == "Box Elder")
+
+# Fetch satellite imagery tile for Box Elder County basemap
+boxelder_tile = get_tiles(
+  boxelder,
+  provider = "Esri.WorldImagery",
+  zoom = 11,
+  crop = TRUE,
+  project = TRUE
+)
+plot(boxelder_tile)
+
+# Transform Box Elder County to align with tile's CRS, convert to terra vector
+boxelder_vect = st_transform(boxelder, crs(boxelder_tile)) |> vect()
+
+# Crop and mask satellite imagery tile to Box Elder County
+boxelder_tile_crop = crop(boxelder_tile, boxelder_vect)
+boxelder_tile_mask = mask(boxelder_tile_crop, boxelder_vect)
+
+# Filter county spatial data to Cache County
+cache = counties |> filter(county == "Cache")
+
+# Fetch satellite imagery tile for Cache County basemap
+cache_tile = get_tiles(
+  cache,
+  provider = "Esri.WorldImagery",
+  zoom = 14,
+  crop = TRUE,
+  project = TRUE
+)
+
+# Transform Cache County to align with tile's CRS, convert to terra vector
+cache_vect = st_transform(cache, crs(cache_tile)) |> vect()
+
+# Crop and mask satellite imagery tile to Cache County
+cache_tile_crop = crop(cache_tile, cache_vect)
+cache_tile_mask = mask(cache_tile_crop, cache_vect)
+
+field_ft_min = min(field_depletion$depletion_ft, na.rm = TRUE)
+field_ft_max = max(field_depletion$depletion_ft, na.rm = TRUE)
+
+boxelder_ft_min = min((field_depletion |> filter(county == "Box Elder"))$depletion_ft, na.rm = TRUE)
+boxelder_ft_max = max((field_depletion |> filter(county == "Box Elder"))$depletion_ft, na.rm = TRUE)
+
+cache_ft_min = min((field_depletion |> filter(county == "Cache"))$depletion_ft, na.rm = TRUE)
+cache_ft_max = max((field_depletion |> filter(county == "Cache"))$depletion_ft, na.rm = TRUE)
+
+# ==== FIELDS CHORO ============================================================
+
 # Choropleth of field-level median annual depletion depth in GSL Basin
 field_depth_choro = ggplot() +
   # Add satellite imagery basemap
   layer_spatial(data = basin_tile_mask) +
-  # Color code each GSL Basin field by median annual depletion depth
+  # Color code each field by median annual depletion depth
   geom_sf(
     data = field_depletion,
     aes(fill = depletion_ft),
@@ -127,15 +166,9 @@ field_depth_choro = ggplot() +
                "#7fcdbb", "#41b6c4", "#1d91c0",
                "#225ea8", "#253494", "#081d58"),
     na.value = "darkgray",
-    breaks = c(
-      min(field_depletion$depletion_ft, na.rm = TRUE),
-      max(field_depletion$depletion_ft, na.rm = TRUE)
-    ),
-    labels = expression("0", "3.64"),
-    limits = c(
-      min(field_depletion$depletion_ft, na.rm = TRUE),
-      max(field_depletion$depletion_ft, na.rm = TRUE)
-    )
+    breaks = c(field_ft_min, field_ft_max),
+    labels = c(comma(field_ft_min, accuracy = 1), comma(field_ft_max, accuracy = 0.01)),
+    limits = c(field_ft_min, field_ft_max)
   ) +
   # Add plot and legend titles
   labs(title = "Field-Level Median Annual Depletion Depth, GSL Basin", fill = "Depletion (AFA)") +
@@ -143,17 +176,19 @@ field_depth_choro = ggplot() +
   theme_minimal() +
   # Customize plot elements
   theme(
-    panel.grid.major = element_blank(), # Remove major panel grids
-    panel.grid.minor = element_blank(), # Remove minor panel grids
-    axis.text = element_blank(), # Remove axes text
-    axis.ticks = element_blank(), # Remove axes ticks
-    axis.title = element_blank(), # Remove axes titles
-    panel.background = element_rect(fill = "white", color = NA), # Create white background
-    plot.background = element_rect(fill = "white", color = NA), # Create white background
-    legend.title = element_text(size = 14, margin = margin(b = 10)), # Adjust legend title
-    legend.text = element_text(size = 12), # Adjust legend tick labels
-    plot.title = element_blank(), # Adjust plot title
-    text = element_text(color = "black", family = "Lato"),
+    text = element_text(color = "black", family = "lato"),
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white", color = NA),
+    plot.title = element_text(size = 18, face = "bold", hjust = 0.5, vjust = -4),
+    axis.ticks = element_blank(),
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.justification = c(0, 1),
+    legend.position = c(0.88, 0.9),
+    legend.title = element_text(size = 14, vjust = 2),
+    legend.text = element_text(size = 12),
   ) +
   # Adjust color scale bar
   guides(
@@ -168,44 +203,16 @@ field_depth_choro
 
 # Save as high-resolution PNG image
 ggsave(
-  "Figures/Maps/field_depth_choro_WorldImagery.png",
+  "Figures/Maps/field_depth_choro.png",
   plot = field_depth_choro,
   width = 16,
   height = 10,
   units = "in",
   dpi = 400
 )
+knitr::plot_crop("Figures/Maps/field_depth_choro.png")
 
 # ==== BOX ELDER FIELDS CHORO ==================================================
-
-# Filter county spatial data to Box Elder County
-boxelder = counties |> filter(county == "Box Elder")
-
-# Fetch satellite imagery tile for Box Elder County basemap
-boxelder_tile = get_tiles(
-  boxelder,
-  provider = "Esri.WorldImagery",
-  zoom = 11,
-  crop = TRUE,
-  project = TRUE
-)
-
-# Esri.WorldImagery zoom = 11
-# Esri.WorldTopoMap zoom = 10
-# Esri.WorldGrayCanvas zoom = 10
-
-# Get spatial extent of tile
-boxelder_tile_extent = ext(boxelder_tile)
-
-# Convert tile to polygon then sf object
-boxelder_tile_poly = as.polygons(boxelder_tile_extent) |> st_as_sf() |> st_set_crs(st_crs(boxelder_tile))
-
-# Transform Box Elder County to align with tile's CRS, convert to terra vector
-boxelder_vect = st_transform(boxelder, crs(boxelder_tile)) |> vect()
-
-# Crop and mask satellite imagery tile to Box Elder County
-boxelder_tile_crop = crop(boxelder_tile, boxelder_vect)
-boxelder_tile_mask = mask(boxelder_tile_crop, boxelder_vect)
 
 # Choropleth of field-level median annual depletion depth in Box Elder County
 boxelder_field_depth_choro = ggplot() +
@@ -217,35 +224,15 @@ boxelder_field_depth_choro = ggplot() +
     aes(fill = depletion_ft), 
     color = NA
   ) + 
-  # # Add Box Elder County boundary
-  # geom_sf(
-  #   data = boxelder,
-  #   fill = NA,
-  #   color = "black",
-  #   linewidth = 0.3
-  # ) +
   # Create continuous, sequential color scale for depletion depth
   scale_fill_gradientn(
     colors = c("#ffffd9", "#edf8b1", "#c7e9b4",
                "#7fcdbb", "#41b6c4", "#1d91c0",
                "#225ea8", "#253494", "#081d58"),
     na.value = "darkgray",
-    breaks = c(
-      min((field_depletion |> filter(county == "Box Elder"))$depletion_ft, na.rm = TRUE),
-      #0.8, 1.6, 2.4,
-      max((field_depletion |> filter(county == "Box Elder"))$depletion_ft, na.rm = TRUE)
-    ),
-    labels = expression(
-      "0",
-      # "0.8",
-      # "1.6",
-      # "2.4",
-      "3.38"
-    ),
-    limits = c(
-      min((field_depletion |> filter(county == "Box Elder"))$depletion_ft, na.rm = TRUE),
-      max((field_depletion |> filter(county == "Box Elder"))$depletion_ft, na.rm = TRUE)
-    )
+    breaks = c(boxelder_ft_min, boxelder_ft_max),
+    labels = c(comma(boxelder_ft_min, accuracy = 1), comma(boxelder_ft_max, accuracy = 0.01)),
+    limits = c(boxelder_ft_min, boxelder_ft_max)
   ) +
   # Add plot and legend titles
   labs(title = "Field-Level Median Annual Depletion Depth, Box Elder County", fill = "Depletion (AFA)") +
@@ -253,18 +240,20 @@ boxelder_field_depth_choro = ggplot() +
   theme_minimal() +
   # Customize plot elements
   theme(
-    panel.grid.major = element_blank(), # Remove major panel grids
-    panel.grid.minor = element_blank(), # Remove minor panel grids
-    axis.text = element_blank(), # Remove axes text
-    axis.ticks = element_blank(), # Remove axes ticks
-    axis.title = element_blank(), # Remove axes titles
-    panel.background = element_rect(fill = "white", color = NA), # Create white background
-    plot.background = element_rect(fill = "white", color = NA), # Create white background
-    legend.title = element_text(size = 14, margin = margin(b = 10)), # Adjust legend title
-    legend.text = element_text(size = 12), # Adjust legend tick labels
-    # plot.title = element_text(size = 20, hjust = 0.5) # Adjust plot title
-    plot.title = element_blank(),
-    text = element_text(color = "black", family = "Lato")
+    text = element_text(color = "black", family = "lato"),
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white", color = NA),
+    plot.title = element_text(size = 18, face = "bold", hjust = 0.5, vjust = -4),
+    axis.ticks = element_blank(),
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.position = c(1, 0.5),
+    legend.justification = c(0.3, 0.5),
+    legend.title = element_text(size = 14, vjust = 2),
+    legend.text = element_text(size = 12),
+    plot.margin = margin(t = 5.5, r = 75, b = 5.5, l = 5.5)
   ) +
   # Adjust color scale bar
   guides(
@@ -279,44 +268,16 @@ boxelder_field_depth_choro
 
 # Save as high-resolution PNG image
 ggsave(
-  "Figures/Maps/boxelder_field_depth_choro_WorldImagery.png",
+  "Figures/Maps/boxelder_field_depth_choro.png",
   plot = boxelder_field_depth_choro, 
   width = 16, 
   height = 10, 
   units = "in", 
   dpi = 500
 )
+knitr::plot_crop("Figures/Maps/boxelder_field_depth_choro.png")
 
 # ==== CACHE FIELDS CHORO ======================================================
-
-# Filter county spatial data to Cache County
-cache = counties |> filter(county == "Cache")
-
-# Fetch satellite imagery tile for Cache County basemap
-cache_tile = get_tiles(
-  cache,
-  provider = "Esri.WorldImagery",
-  zoom = 14,
-  crop = TRUE,
-  project = TRUE
-)
-
-# Esri.WorldImagery zoom = 14
-# Esri.WorldTopoMap zoom = 11
-# Esri.WorldGrayCanvas zoom = 11
-
-# Get spatial extent of tile
-cache_tile_extent = ext(cache_tile)
-
-# Convert tile to polygon then sf object
-cache_tile_poly = as.polygons(cache_tile_extent) |> st_as_sf() |> st_set_crs(st_crs(cache_tile))
-
-# Transform Cache County to align with tile's CRS, convert to terra vector
-cache_vect = st_transform(cache, crs(cache_tile)) |> vect()
-
-# Crop and mask satellite imagery tile to Cache County
-cache_tile_crop = crop(cache_tile, cache_vect)
-cache_tile_mask = mask(cache_tile_crop, cache_vect)
 
 # Choropleth of field-level median annual depletion depth in Cache County
 cache_field_depth_choro = ggplot() +
@@ -328,35 +289,15 @@ cache_field_depth_choro = ggplot() +
     aes(fill = depletion_ft),
     color = NA
   ) +
-  # # Add Cache County boundary
-  # geom_sf(
-  #   data = cache,
-  #   fill = NA,
-  #   color = "black",
-  #   linewidth = 0.3
-  # ) +
   # Create continuous, sequential color scale for depletion depth
   scale_fill_gradientn(
     colors = c("#ffffd9", "#edf8b1", "#c7e9b4",
                "#7fcdbb", "#41b6c4", "#1d91c0",
                "#225ea8", "#253494", "#081d58"),
     na.value = "darkgray",
-    breaks = c(
-      min((field_depletion |> filter(county == "Cache"))$depletion_ft, na.rm = TRUE),
-      #0.8, 1.6, 2.4,
-      max((field_depletion |> filter(county == "Cache"))$depletion_ft, na.rm = TRUE)
-    ),
-    labels = expression(
-      "0",
-      # "0.8",
-      # "1.6",
-      # "2.4",
-      "3.29"
-    ),
-    limits = c(
-      min((field_depletion |> filter(county == "Cache"))$depletion_ft, na.rm = TRUE),
-      max((field_depletion |> filter(county == "Cache"))$depletion_ft, na.rm = TRUE)
-    )
+    breaks = c(cache_ft_min, cache_ft_max),
+    labels = c(comma(cache_ft_min, accuracy = 1), comma(cache_ft_max, accuracy = 0.01)),
+    limits = c(cache_ft_min, cache_ft_max)
   ) +
   # Add plot and legend titles
   labs(title = "Field-Level Median Annual Depletion Depth, Cache County", fill = "Depletion (AFA)") +
@@ -364,18 +305,19 @@ cache_field_depth_choro = ggplot() +
   theme_minimal() +
   # Customize plot elements
   theme(
-    panel.grid.major = element_blank(), # Remove major panel grids
-    panel.grid.minor = element_blank(), # Remove minor panel grids
-    axis.text = element_blank(), # Remove axes text
-    axis.ticks = element_blank(), # Remove axes ticks
-    axis.title = element_blank(), # Remove axes titles
-    panel.background = element_rect(fill = "white", color = NA), # Create white background
-    plot.background = element_rect(fill = "white", color = NA), # Create white background
-    legend.title = element_text(size = 14, margin = margin(b = 10)), # Adjust legend title
-    legend.text = element_text(size = 12), # Adjust legend tick labels
-    plot.title = element_blank(), # Adjust plot title
-    text = element_text(color = "black", family = "Lato"),
-    #plot.title = element_text(size = 20, hjust = 0.5) # Adjust plot title
+    text = element_text(color = "black", family = "lato"),
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white", color = NA),
+    plot.title = element_text(size = 18, face = "bold", hjust = 0.5, vjust = -4),
+    axis.ticks = element_blank(),
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.position = c(1, 0.5),
+    legend.justification = c(0.1, 0.5),
+    legend.title = element_text(size = 14, vjust = 2),
+    legend.text = element_text(size = 12)
   ) +
   # Adjust color scale bar
   guides(
@@ -390,10 +332,11 @@ cache_field_depth_choro
 
 # Save as high-resolution PNG image
 ggsave(
-  "Figures/Maps/cache_field_depth_choro_WorldImagery.png",
+  "Figures/Maps/cache_field_depth_choro.png",
   plot = cache_field_depth_choro, 
   width = 16, 
   height = 10, 
   units = "in", 
   dpi = 500
 )
+knitr::plot_crop("Figures/Maps/cache_field_depth_choro.png")

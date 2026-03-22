@@ -61,21 +61,25 @@ depletion_annual = depletion_annual |>
     land_use_group %in% c("Active IR", "SubIRR", NA)
   )
 
+# Load quarter quarters
 quarter_quarters = st_read("Data/Raw/PLSS/plss_layers.gpkg", layer = "quarter_quarter") |> 
   select(quarter_quarter_id = OBJECTID) |> 
   st_make_valid() |> 
   st_intersection(basin_boundary)
 
+# Load quarter sections
 quarters = st_read("Data/Raw/PLSS/plss_layers.gpkg", layer = "quarter") |> 
   select(quarter_id = OBJECTID) |> 
   st_make_valid() |> 
   st_intersection(basin_boundary)
 
+# Load sections
 sections = st_read("Data/Raw/PLSS/plss_layers.gpkg", layer = "section") |> 
   select(section_id = OBJECTID) |> 
   st_make_valid() |> 
   st_intersection(basin_boundary)
 
+# Load townships
 townships = st_read("Data/Raw/PLSS/plss_layers.gpkg", layer = "township") |> 
   select(township_id = OBJECTID) |> 
   st_make_valid() |> 
@@ -286,10 +290,6 @@ basin_tile = get_tiles(
   project = TRUE
 )
 
-# Esri.WorldImagery zoom = 11
-# Esri.WorldTopoMap zoom = 10
-# Esri.WorldGrayCanvas zoom = 11
-
 # Get spatial extent of tile
 basin_tile_extent = ext(basin_tile)
 
@@ -343,16 +343,9 @@ qq_depth_choro = ggplot() +
     na.value = "darkgray",
     breaks = c(
       min(quarter_quarters_depletion$depletion_ft, na.rm = TRUE),
-      # 0.8, 1.6, 2.4,
       max(quarter_quarters_depletion$depletion_ft, na.rm = TRUE)
     ),
-    labels = expression(
-      "0",
-      # "0.8",
-      # "1.6",
-      # "2.4",
-      "3.16"
-    ),
+    labels = expression("0", "3.16"),
     limits = c(
       min(quarter_quarters_depletion$depletion_ft, na.rm = TRUE),
       max(quarter_quarters_depletion$depletion_ft, na.rm = TRUE)
@@ -373,7 +366,6 @@ qq_depth_choro = ggplot() +
     plot.background = element_rect(fill = "white", color = NA), # Create white background
     legend.title = element_text(size = 14, margin = margin(b = 10)), # Adjust legend title
     legend.text = element_text(size = 12), # Adjust legend tick labels
-    # plot.title = element_text(size = 20, hjust = 0.5), # Adjust plot title
     plot.title = element_blank(),
     legend.position = c(0.88, 0.9), # Adjust legend position
     legend.justification = c(0, 1), # Adjust legend position
@@ -428,16 +420,9 @@ qq_volume_choro = ggplot() +
     na.value = "darkgray",
     breaks = c(
       min(quarter_quarters_depletion$depletion_af, na.rm = TRUE),
-      # 0.8, 1.6, 2.4,
       max(quarter_quarters_depletion$depletion_af, na.rm = TRUE)
     ),
-    labels = expression(
-      "0",
-      # "0.8",
-      # "1.6",
-      # "2.4",
-      "249.26"
-    ),
+    labels = expression("0", "249.26"),
     limits = c(
       min(quarter_quarters_depletion$depletion_af, na.rm = TRUE),
       max(quarter_quarters_depletion$depletion_af, na.rm = TRUE)
@@ -458,7 +443,6 @@ qq_volume_choro = ggplot() +
     plot.background = element_rect(fill = "white", color = NA), # Create white background
     legend.title = element_text(size = 14, margin = margin(b = 10)), # Adjust legend title
     legend.text = element_text(size = 12), # Adjust legend tick labels
-    # plot.title = element_text(size = 20, hjust = 0.5), # Adjust plot title
     plot.title = element_blank(),
     legend.position = c(0.88, 0.9), # Adjust legend position
     legend.justification = c(0, 1), # Adjust legend position
@@ -515,16 +499,9 @@ q_depth_choro = ggplot() +
     na.value = "darkgray",
     breaks = c(
       min(quarters_depletion$depletion_ft, na.rm = TRUE),
-      # 0.8, 1.6, 2.4,
       max(quarters_depletion$depletion_ft, na.rm = TRUE)
     ),
-    labels = expression(
-      "0",
-      # "0.8",
-      # "1.6",
-      # "2.4",
-      "3.16"
-    ),
+    labels = expression("0", "3.16"),
     limits = c(
       min(quarters_depletion$depletion_ft, na.rm = TRUE),
       max(quarters_depletion$depletion_ft, na.rm = TRUE)
@@ -545,7 +522,6 @@ q_depth_choro = ggplot() +
     plot.background = element_rect(fill = "white", color = NA), # Create white background
     legend.title = element_text(size = 14, margin = margin(b = 10)), # Adjust legend title
     legend.text = element_text(size = 12), # Adjust legend tick labels
-    # plot.title = element_text(size = 20, hjust = 0.5), # Adjust plot title
     plot.title = element_blank(),
     legend.position = c(0.88, 0.9), # Adjust legend position
     legend.justification = c(0, 1), # Adjust legend position
@@ -600,16 +576,9 @@ q_volume_choro = ggplot() +
     na.value = "darkgray",
     breaks = c(
       min(quarters_depletion$depletion_af, na.rm = TRUE),
-      # 0.8, 1.6, 2.4,
       max(quarters_depletion$depletion_af, na.rm = TRUE)
     ),
-    labels = expression(
-      "0",
-      # "0.8",
-      # "1.6",
-      # "2.4",
-      "470.34"
-    ),
+    labels = expression("0", "470.34"),
     limits = c(
       min(quarters_depletion$depletion_af, na.rm = TRUE),
       max(quarters_depletion$depletion_af, na.rm = TRUE)
@@ -687,16 +656,9 @@ s_depth_choro = ggplot() +
     na.value = "darkgray",
     breaks = c(
       min(sections_depletion$depletion_ft, na.rm = TRUE),
-      # 0.8, 1.6, 2.4,
       max(sections_depletion$depletion_ft, na.rm = TRUE)
     ),
-    labels = expression(
-      "0",
-      # "0.8",
-      # "1.6",
-      # "2.4",
-      "2.82"
-    ),
+    labels = expression("0", "2.82"),
     limits = c(
       min(sections_depletion$depletion_ft, na.rm = TRUE),
       max(sections_depletion$depletion_ft, na.rm = TRUE)
@@ -717,7 +679,6 @@ s_depth_choro = ggplot() +
     plot.background = element_rect(fill = "white", color = NA), # Create white background
     legend.title = element_text(size = 14, margin = margin(b = 10)), # Adjust legend title
     legend.text = element_text(size = 12), # Adjust legend tick labels
-    # plot.title = element_text(size = 20, hjust = 0.5), # Adjust plot title
     plot.title = element_blank(),
     legend.position = c(0.88, 0.9), # Adjust legend position
     legend.justification = c(0, 1), # Adjust legend position
@@ -772,16 +733,9 @@ s_volume_choro = ggplot() +
     na.value = "darkgray",
     breaks = c(
       min(sections_depletion$depletion_af, na.rm = TRUE),
-      # 0.8, 1.6, 2.4,
       max(sections_depletion$depletion_af, na.rm = TRUE)
     ),
-    labels = expression(
-      "0",
-      # "0.8",
-      # "1.6",
-      # "2.4",
-      "1673.21"
-    ),
+    labels = expression("0", "1673.21"),
     limits = c(
       min(sections_depletion$depletion_af, na.rm = TRUE),
       max(sections_depletion$depletion_af, na.rm = TRUE)
@@ -802,7 +756,6 @@ s_volume_choro = ggplot() +
     plot.background = element_rect(fill = "white", color = NA), # Create white background
     legend.title = element_text(size = 14, margin = margin(b = 10)), # Adjust legend title
     legend.text = element_text(size = 12), # Adjust legend tick labels
-    # plot.title = element_text(size = 20, hjust = 0.5), # Adjust plot title
     plot.title = element_blank(),
     legend.position = c(0.88, 0.9), # Adjust legend position
     legend.justification = c(0, 1), # Adjust legend position
@@ -824,7 +777,7 @@ s_volume_choro
 # Choropleth of field-level median annual depletion depth in GSL Basin
 t_depth_choro = ggplot() +
   # Add satellite imagery basemap
-  layer_spatial(data = basin_tile_mask) +
+  # layer_spatial(data = basin_tile_mask) +
   # Color code each field by median annual depletion depth
   geom_sf(
     data = townships_depletion, 
@@ -861,16 +814,9 @@ t_depth_choro = ggplot() +
     na.value = "darkgray",
     breaks = c(
       min(townships_depletion$depletion_ft, na.rm = TRUE),
-      # 0.8, 1.6, 2.4,
       max(townships_depletion$depletion_ft, na.rm = TRUE)
     ),
-    labels = expression(
-      "0",
-      # "0.8",
-      # "1.6",
-      # "2.4",
-      "2.47"
-    ),
+    labels = expression("0", "2.47"),
     limits = c(
       min(townships_depletion$depletion_ft, na.rm = TRUE),
       max(townships_depletion$depletion_ft, na.rm = TRUE)
@@ -891,7 +837,6 @@ t_depth_choro = ggplot() +
     plot.background = element_rect(fill = "white", color = NA), # Create white background
     legend.title = element_text(size = 14, margin = margin(b = 10)), # Adjust legend title
     legend.text = element_text(size = 12), # Adjust legend tick labels
-    # plot.title = element_text(size = 20, hjust = 0.5), # Adjust plot title
     plot.title = element_blank(),
     legend.position = c(0.88, 0.9), # Adjust legend position
     legend.justification = c(0, 1), # Adjust legend position
@@ -948,16 +893,9 @@ t_volume_choro = ggplot() +
     na.value = "darkgray",
     breaks = c(
       min(townships_depletion$depletion_af, na.rm = TRUE),
-      # 0.8, 1.6, 2.4,
       max(townships_depletion$depletion_af, na.rm = TRUE)
     ),
-    labels = expression(
-      "0",
-      # "0.8",
-      # "1.6",
-      # "2.4",
-      "30868"
-    ),
+    labels = expression("0", "30,868"),
     limits = c(
       min(townships_depletion$depletion_af, na.rm = TRUE),
       max(townships_depletion$depletion_af, na.rm = TRUE)
@@ -978,7 +916,6 @@ t_volume_choro = ggplot() +
     plot.background = element_rect(fill = "white", color = NA), # Create white background
     legend.title = element_text(size = 14, margin = margin(b = 10)), # Adjust legend title
     legend.text = element_text(size = 12), # Adjust legend tick labels
-    # plot.title = element_text(size = 20, hjust = 0.5), # Adjust plot title
     plot.title = element_blank(),
     legend.position = c(0.88, 0.9), # Adjust legend position
     legend.justification = c(0, 1), # Adjust legend position
@@ -994,3 +931,322 @@ t_volume_choro = ggplot() +
     )
   )
 t_volume_choro
+
+# ==== BOX ELDER ===============================================================
+
+# Choropleth of field-level median annual depletion depth in GSL Basin
+boxelder_q_depth_choro = ggplot() +
+  # Color code each field by median annual depletion depth
+  geom_sf(
+    data = quarters_depletion |> st_intersection(counties |> filter(county == "Box Elder")), 
+    aes(fill = depletion_ft), 
+    color = "grey",
+    linewidth = 0.01
+  ) +
+  # Add county boundaries
+  geom_sf(
+    data = counties |> filter(county == "Box Elder"),
+    color = "black",
+    fill = NA,
+    linewidth = 0.3
+  ) +
+  # Create continuous, sequential color scale for depletion depth
+  scale_fill_gradientn(
+    colors = c("#ffffd9", "#edf8b1", "#c7e9b4",
+               "#7fcdbb", "#41b6c4", "#1d91c0",
+               "#225ea8", "#253494", "#081d58"),
+    na.value = "darkgray",
+    breaks = c(
+      min((quarters_depletion |> st_intersection(counties |> filter(county == "Box Elder")))$depletion_ft, na.rm = TRUE),
+      max((quarters_depletion |> st_intersection(counties |> filter(county == "Box Elder")))$depletion_ft, na.rm = TRUE)
+    ),
+    labels = expression("0", "3.16"),
+    limits = c(
+      min((quarters_depletion |> st_intersection(counties |> filter(county == "Box Elder")))$depletion_ft, na.rm = TRUE),
+      max((quarters_depletion |> st_intersection(counties |> filter(county == "Box Elder")))$depletion_ft, na.rm = TRUE)
+    )
+  ) +
+  # Add plot and legend titles
+  labs(title = "HUC12-Level Median Annual Depletion Depth, GSL Basin", fill = "Depletion (AFA)") +
+  # Minimalist ggplot theme
+  theme_minimal() +
+  # Customize plot elements
+  theme(
+    panel.grid.major = element_blank(), # Remove major panel grids
+    panel.grid.minor = element_blank(), # Remove minor panel grids
+    axis.text = element_blank(), # Remove axes text
+    axis.ticks = element_blank(), # Remove axes ticks
+    axis.title = element_blank(), # Remove axes titles
+    panel.background = element_rect(fill = "white", color = NA), # Create white background
+    plot.background = element_rect(fill = "white", color = NA), # Create white background
+    legend.title = element_text(size = 14, margin = margin(b = 10)), # Adjust legend title
+    legend.text = element_text(size = 12), # Adjust legend tick labels
+    plot.title = element_blank(),
+    legend.position = c(0.88, 0.9), # Adjust legend position
+    legend.justification = c(0, 1), # Adjust legend position
+    text = element_text(color = "black", family = "Lato")
+  ) +
+  # Adjust color scale bar
+  guides(
+    fill = guide_colorbar(
+      barheight = unit(2, "in"),
+      frame.colour = "black",
+      frame.linewidth = 0.2,
+      ticks.colour = NA
+    )
+  )
+boxelder_q_depth_choro
+
+# ==== CACHE ===================================================================
+
+# Choropleth of field-level median annual depletion depth in GSL Basin
+cache_qq_depth_choro = ggplot() +
+  # Color code each field by median annual depletion depth
+  geom_sf(
+    data = quarter_quarters_depletion |> st_intersection(counties |> filter(county == "Cache")), 
+    aes(fill = depletion_ft), 
+    color = "grey",
+    linewidth = 0.01
+  ) +
+  # Add county boundaries
+  geom_sf(
+    data = counties |> filter(county == "Cache"),
+    color = "black",
+    fill = NA,
+    linewidth = 0.3
+  ) +
+  # Create continuous, sequential color scale for depletion depth
+  scale_fill_gradientn(
+    colors = c("#ffffd9", "#edf8b1", "#c7e9b4",
+               "#7fcdbb", "#41b6c4", "#1d91c0",
+               "#225ea8", "#253494", "#081d58"),
+    na.value = "darkgray",
+    breaks = c(
+      min((quarter_quarters_depletion |> st_intersection(counties |> filter(county == "Cache")))$depletion_ft, na.rm = TRUE),
+      max((quarter_quarters_depletion |> st_intersection(counties |> filter(county == "Cache")))$depletion_ft, na.rm = TRUE)
+    ),
+    labels = expression("0", "2.62"),
+    limits = c(
+      min((quarter_quarters_depletion |> st_intersection(counties |> filter(county == "Cache")))$depletion_ft, na.rm = TRUE),
+      max((quarter_quarters_depletion |> st_intersection(counties |> filter(county == "Cache")))$depletion_ft, na.rm = TRUE)
+    )
+  ) +
+  # Add plot and legend titles
+  labs(title = "HUC12-Level Median Annual Depletion Depth, GSL Basin", fill = "Depletion (AFA)") +
+  # Minimalist ggplot theme
+  theme_minimal() +
+  # Customize plot elements
+  theme(
+    panel.grid.major = element_blank(), # Remove major panel grids
+    panel.grid.minor = element_blank(), # Remove minor panel grids
+    axis.text = element_blank(), # Remove axes text
+    axis.ticks = element_blank(), # Remove axes ticks
+    axis.title = element_blank(), # Remove axes titles
+    panel.background = element_rect(fill = "white", color = NA), # Create white background
+    plot.background = element_rect(fill = "white", color = NA), # Create white background
+    legend.title = element_text(size = 14, margin = margin(b = 10)), # Adjust legend title
+    legend.text = element_text(size = 12), # Adjust legend tick labels
+    plot.title = element_blank(),
+    legend.position = c(0.88, 0.9), # Adjust legend position
+    legend.justification = c(0, 1), # Adjust legend position
+    text = element_text(color = "black", family = "Lato")
+  ) +
+  # Adjust color scale bar
+  guides(
+    fill = guide_colorbar(
+      barheight = unit(2, "in"),
+      frame.colour = "black",
+      frame.linewidth = 0.2,
+      ticks.colour = NA
+    )
+  )
+cache_qq_depth_choro
+
+# Choropleth of field-level median annual depletion depth in GSL Basin
+cache_q_depth_choro = ggplot() +
+  # Color code each field by median annual depletion depth
+  geom_sf(
+    data = quarters_depletion |> st_intersection(counties |> filter(county == "Cache")), 
+    aes(fill = depletion_ft), 
+    color = "grey",
+    linewidth = 0.01
+  ) +
+  # Add county boundaries
+  geom_sf(
+    data = counties |> filter(county == "Cache"),
+    color = "black",
+    fill = NA,
+    linewidth = 0.3
+  ) +
+  # Create continuous, sequential color scale for depletion depth
+  scale_fill_gradientn(
+    colors = c("#ffffd9", "#edf8b1", "#c7e9b4",
+               "#7fcdbb", "#41b6c4", "#1d91c0",
+               "#225ea8", "#253494", "#081d58"),
+    na.value = "darkgray",
+    breaks = c(
+      min((quarters_depletion |> st_intersection(counties |> filter(county == "Cache")))$depletion_ft, na.rm = TRUE),
+      max((quarters_depletion |> st_intersection(counties |> filter(county == "Cache")))$depletion_ft, na.rm = TRUE)
+    ),
+    labels = expression("0", "2.62"),
+    limits = c(
+      min((quarters_depletion |> st_intersection(counties |> filter(county == "Cache")))$depletion_ft, na.rm = TRUE),
+      max((quarters_depletion |> st_intersection(counties |> filter(county == "Cache")))$depletion_ft, na.rm = TRUE)
+    )
+  ) +
+  # Add plot and legend titles
+  labs(title = "HUC12-Level Median Annual Depletion Depth, GSL Basin", fill = "Depletion (AFA)") +
+  # Minimalist ggplot theme
+  theme_minimal() +
+  # Customize plot elements
+  theme(
+    panel.grid.major = element_blank(), # Remove major panel grids
+    panel.grid.minor = element_blank(), # Remove minor panel grids
+    axis.text = element_blank(), # Remove axes text
+    axis.ticks = element_blank(), # Remove axes ticks
+    axis.title = element_blank(), # Remove axes titles
+    panel.background = element_rect(fill = "white", color = NA), # Create white background
+    plot.background = element_rect(fill = "white", color = NA), # Create white background
+    legend.title = element_text(size = 14, margin = margin(b = 10)), # Adjust legend title
+    legend.text = element_text(size = 12), # Adjust legend tick labels
+    plot.title = element_blank(),
+    legend.position = c(0.88, 0.9), # Adjust legend position
+    legend.justification = c(0, 1), # Adjust legend position
+    text = element_text(color = "black", family = "Lato")
+  ) +
+  # Adjust color scale bar
+  guides(
+    fill = guide_colorbar(
+      barheight = unit(2, "in"),
+      frame.colour = "black",
+      frame.linewidth = 0.2,
+      ticks.colour = NA
+    )
+  )
+cache_q_depth_choro
+
+# Choropleth of field-level median annual depletion depth in GSL Basin
+cache_s_depth_choro = ggplot() +
+  # Color code each field by median annual depletion depth
+  geom_sf(
+    data = sections_depletion |> st_intersection(counties |> filter(county == "Cache")), 
+    aes(fill = depletion_ft), 
+    color = "grey",
+    linewidth = 0.01
+  ) +
+  # Add county boundaries
+  geom_sf(
+    data = counties |> filter(county == "Cache"),
+    color = "black",
+    fill = NA,
+    linewidth = 0.3
+  ) +
+  # Create continuous, sequential color scale for depletion depth
+  scale_fill_gradientn(
+    colors = c("#ffffd9", "#edf8b1", "#c7e9b4",
+               "#7fcdbb", "#41b6c4", "#1d91c0",
+               "#225ea8", "#253494", "#081d58"),
+    na.value = "darkgray",
+    breaks = c(
+      min((sections_depletion |> st_intersection(counties |> filter(county == "Cache")))$depletion_ft, na.rm = TRUE),
+      max((sections_depletion |> st_intersection(counties |> filter(county == "Cache")))$depletion_ft, na.rm = TRUE)
+    ),
+    labels = expression("0", "2.18"),
+    limits = c(
+      min((sections_depletion |> st_intersection(counties |> filter(county == "Cache")))$depletion_ft, na.rm = TRUE),
+      max((sections_depletion |> st_intersection(counties |> filter(county == "Cache")))$depletion_ft, na.rm = TRUE)
+    )
+  ) +
+  # Add plot and legend titles
+  labs(title = "HUC12-Level Median Annual Depletion Depth, GSL Basin", fill = "Depletion (AFA)") +
+  # Minimalist ggplot theme
+  theme_minimal() +
+  # Customize plot elements
+  theme(
+    panel.grid.major = element_blank(), # Remove major panel grids
+    panel.grid.minor = element_blank(), # Remove minor panel grids
+    axis.text = element_blank(), # Remove axes text
+    axis.ticks = element_blank(), # Remove axes ticks
+    axis.title = element_blank(), # Remove axes titles
+    panel.background = element_rect(fill = "white", color = NA), # Create white background
+    plot.background = element_rect(fill = "white", color = NA), # Create white background
+    legend.title = element_text(size = 14, margin = margin(b = 10)), # Adjust legend title
+    legend.text = element_text(size = 12), # Adjust legend tick labels
+    plot.title = element_blank(),
+    legend.position = c(0.88, 0.9), # Adjust legend position
+    legend.justification = c(0, 1), # Adjust legend position
+    text = element_text(color = "black", family = "Lato")
+  ) +
+  # Adjust color scale bar
+  guides(
+    fill = guide_colorbar(
+      barheight = unit(2, "in"),
+      frame.colour = "black",
+      frame.linewidth = 0.2,
+      ticks.colour = NA
+    )
+  )
+cache_s_depth_choro
+
+# Choropleth of field-level median annual depletion depth in GSL Basin
+cache_t_depth_choro = ggplot() +
+  # Color code each field by median annual depletion depth
+  geom_sf(
+    data = townships_depletion |> st_intersection(counties |> filter(county == "Cache")), 
+    aes(fill = depletion_ft), 
+    color = "grey",
+    linewidth = 0.01
+  ) +
+  # Add county boundaries
+  geom_sf(
+    data = counties |> filter(county == "Cache"),
+    color = "black",
+    fill = NA,
+    linewidth = 0.3
+  ) +
+  # Create continuous, sequential color scale for depletion depth
+  scale_fill_gradientn(
+    colors = c("#ffffd9", "#edf8b1", "#c7e9b4",
+               "#7fcdbb", "#41b6c4", "#1d91c0",
+               "#225ea8", "#253494", "#081d58"),
+    na.value = "darkgray",
+    breaks = c(
+      min((townships_depletion |> st_intersection(counties |> filter(county == "Cache")))$depletion_ft, na.rm = TRUE),
+      max((townships_depletion |> st_intersection(counties |> filter(county == "Cache")))$depletion_ft, na.rm = TRUE)
+    ),
+    labels = expression("0.90", "2.10"),
+    limits = c(
+      min((townships_depletion |> st_intersection(counties |> filter(county == "Cache")))$depletion_ft, na.rm = TRUE),
+      max((townships_depletion |> st_intersection(counties |> filter(county == "Cache")))$depletion_ft, na.rm = TRUE)
+    )
+  ) +
+  # Add plot and legend titles
+  labs(title = "HUC12-Level Median Annual Depletion Depth, GSL Basin", fill = "Depletion (AFA)") +
+  # Minimalist ggplot theme
+  theme_minimal() +
+  # Customize plot elements
+  theme(
+    panel.grid.major = element_blank(), # Remove major panel grids
+    panel.grid.minor = element_blank(), # Remove minor panel grids
+    axis.text = element_blank(), # Remove axes text
+    axis.ticks = element_blank(), # Remove axes ticks
+    axis.title = element_blank(), # Remove axes titles
+    panel.background = element_rect(fill = "white", color = NA), # Create white background
+    plot.background = element_rect(fill = "white", color = NA), # Create white background
+    legend.title = element_text(size = 14, margin = margin(b = 10)), # Adjust legend title
+    legend.text = element_text(size = 12), # Adjust legend tick labels
+    plot.title = element_blank(),
+    legend.position = c(0.88, 0.9), # Adjust legend position
+    legend.justification = c(0, 1), # Adjust legend position
+    text = element_text(color = "black", family = "Lato")
+  ) +
+  # Adjust color scale bar
+  guides(
+    fill = guide_colorbar(
+      barheight = unit(2, "in"),
+      frame.colour = "black",
+      frame.linewidth = 0.2,
+      ticks.colour = NA
+    )
+  )
+cache_t_depth_choro
